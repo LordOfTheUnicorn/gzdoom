@@ -40,7 +40,7 @@
 #endif
 
 #include "i_common.h"
-
+#define HAVE_METAL
 #include "v_video.h"
 #include "bitmap.h"
 #include "c_dispatch.h"
@@ -55,10 +55,15 @@
 
 #include "gl_framebuffer.h"
 #ifdef HAVE_VULKAN
-#include "vulkan/system/vk_framebuffer.h"
+#   include "vulkan/system/vk_framebuffer.h"
+#endif
+#ifdef HAVE_METAL
+#   include "metal/system/MetalCocoaView.h"
+#   include "metal/system/ml_framebuffer.h"
+#   include "metal/renderer/ml_renderstate.h"
 #endif
 #ifdef HAVE_SOFTPOLY
-#include "poly_framebuffer.h"
+#   include "poly_framebuffer.h"
 #endif
 
 extern bool ToggleFullscreen;
@@ -111,7 +116,6 @@ CUSTOM_CVAR(Bool, vid_autoswitch, true, CVAR_ARCHIVE | CVAR_GLOBALCONFIG | CVAR_
 
 
 // ---------------------------------------------------------------------------
-
 
 namespace
 {
@@ -457,7 +461,15 @@ public:
 		else
 #endif
 		{
-			SetupOpenGLView(ms_window, OpenGLProfile::Core);
+            if (fb == nullptr)
+                fb = new MetalRenderer::MetalFrameBuffer(nullptr, vid_fullscreen);
+            const NSRect rect = [ms_window contentRectForFrameRect:[ms_window frame]];
+            MetalRenderer::m_view = [[MetalCocoaView alloc] initWithFrame:rect device:MetalRenderer::device vsync:YES Str:@"NewView"];
+            [ms_window setContentView:(NSView*)MetalRenderer::m_view];
+            [ms_window setDelegate:(MetalCocoaView*)MetalRenderer::m_view];
+            metalView = MetalRenderer::m_view;
+
+//            SetupOpenGLView(ms_window, OpenGLProfile::Core);
 		}
 
 		if (fb == nullptr)
@@ -488,22 +500,39 @@ public:
 	{
 		return ms_window;
 	}
-
+    
+#ifdef HAVE_METAL
+    static MetalCocoaView* GetCocoaWindow()
+    {
+        return metalView;
+    }
+#endif
+    
 private:
 #ifdef HAVE_VULKAN
 	VulkanDevice *m_vulkanDevice = nullptr;
 #endif
 	static CocoaWindow* ms_window;
-
+#ifdef HAVE_METAL
+    static MetalCocoaView* metalView;
+#endif
 	static bool ms_isVulkanEnabled;
 };
 
+#ifdef HAVE_METAL
+    MetalCocoaView* CocoaVideo::metalView;
+#endif
 
 CocoaWindow* CocoaVideo::ms_window;
 
 bool CocoaVideo::ms_isVulkanEnabled;
 
-
+#ifdef HAVE_METAL
+MetalCocoaView* GetMacWindow()
+{
+    return CocoaVideo::GetCocoaWindow();
+}
+#endif
 // ---------------------------------------------------------------------------
 
 
@@ -580,14 +609,14 @@ int SystemBaseFrameBuffer::GetTitleBarHeight() const
 
 int SystemBaseFrameBuffer::GetClientWidth()
 {
-	const int clientWidth = I_GetContentViewSize(m_window).width;
-	return clientWidth > 0 ? clientWidth : GetWidth();
+//	const int clientWidth = I_GetContentViewSize(m_window).width;
+    return 1440;//clientWidth > 0 ? clientWidth : GetWidth();
 }
 
 int SystemBaseFrameBuffer::GetClientHeight()
 {
-	const int clientHeight = I_GetContentViewSize(m_window).height;
-	return clientHeight > 0 ? clientHeight : GetHeight();
+//	const int clientHeight = I_GetContentViewSize(m_window).height;
+    return 900;//clientHeight > 0 ? clientHeight : GetHeight();
 }
 
 

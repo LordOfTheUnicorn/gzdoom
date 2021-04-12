@@ -55,8 +55,8 @@
     metalLayer.framebufferOnly = YES; //todo: optimized way
     metalLayer.pixelFormat = MTLPixelFormatBGRA8Unorm;
     metalLayer.wantsExtendedDynamicRangeContent = false;
-    //metalLayer.drawableSize = CGSizeMake(self.frame.size.width, self.frame.size.height);
-    metalLayer.drawableSize = CGSizeMake(1440, 900);
+    metalLayer.drawableSize = CGSizeMake(self.frame.size.width, self.frame.size.height);
+//    metalLayer.drawableSize = CGSizeMake(1440, 900);
     metalLayer.autoresizingMask = kCALayerWidthSizable | kCALayerHeightSizable;
     metalLayer.colorspace = CGColorSpaceCreateWithName(kCGColorSpaceDisplayP3); // TEMPORARY
     if (@available(macOS 10.13, *)) {

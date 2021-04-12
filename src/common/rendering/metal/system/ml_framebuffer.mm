@@ -79,7 +79,7 @@ void MetalFrameBuffer::BeginFrame()
     {
         //dispatch_semaphore_wait(MLRenderer->semaphore, DISPATCH_TIME_FOREVER);
         MLRenderer->BeginFrame();
-        //printf("Begin Frame !\n");
+//        printf("Begin Frame !\n");
         if (true)
         {
             renderPassDescriptor = [MTLRenderPassDescriptor renderPassDescriptor];
@@ -133,10 +133,10 @@ void MetalFrameBuffer::BeginFrame()
     }
 }
 
-//IHardwareTexture *MetalFrameBuffer::CreateHardwareTexture()
-//{
-//    return new MTLHardwareTexture();
-//}
+IHardwareTexture *MetalFrameBuffer::CreateHardwareTexture(int numchannels)
+{
+    return new MTLHardwareTexture();
+}
 //
 //sector_t *MetalFrameBuffer::RenderView(player_t *player)
 //{
@@ -280,6 +280,11 @@ void MetalFrameBuffer::Update()
     Super::Update();
 }
 
+FRenderState* MetalFrameBuffer::RenderState()
+{
+    return MLRenderer->ml_RenderState;
+}
+
 //uint32_t MetalFrameBuffer::GetCaps()
 //{
 //    if (!V_IsHardwareRenderer())
@@ -299,12 +304,13 @@ void MetalFrameBuffer::Update()
 
 FTexture* MetalFrameBuffer::WipeStartScreen()
 {
+    return nullptr;
     const auto &viewport = screen->mScreenViewport;
     
     auto tex = new FWrapperTexture(viewport.width, viewport.height, 1);
     auto systex = static_cast<MTLHardwareTexture*>(tex->GetSystemTexture());
     MTLRegion region = MTLRegionMake2D(0, 0, viewport.width, viewport.height);
-  //  @autoreleasepool
+//    @autoreleasepool
     {
         OBJC_ID(MTLCommandBuffer)localCommandBuffer = [MLRenderer->ml_RenderState->commandQueue commandBuffer];
         OBJC_ID(MTLBlitCommandEncoder) blit = [localCommandBuffer blitCommandEncoder];
@@ -330,13 +336,14 @@ FTexture* MetalFrameBuffer::WipeStartScreen()
 
 FTexture* MetalFrameBuffer::WipeEndScreen()
 {
-    //MLRenderer->Flush();
+    return nullptr;
+    MLRenderer->Flush();
     [MLRenderer->ml_RenderState->renderCommandEncoder endEncoding];
     [MLRenderer->ml_RenderState->commandBuffer commit];
     const auto &viewport = screen->mScreenViewport;
     auto tex = new FWrapperTexture(viewport.width, viewport.height, 1);
     auto systex = static_cast<MTLHardwareTexture*>(tex->GetSystemTexture());
-   // @autoreleasepool
+//    @autoreleasepool
     {
            OBJC_ID(MTLCommandBuffer)localCommandBuffer = [MLRenderer->ml_RenderState->commandQueue commandBuffer];
            OBJC_ID(MTLBlitCommandEncoder) blit = [localCommandBuffer blitCommandEncoder];
@@ -358,7 +365,7 @@ FTexture* MetalFrameBuffer::WipeEndScreen()
            [buff release];
     }
     //
-    //screen->BeginFrame();
+    screen->BeginFrame();
     return tex;
 }
 

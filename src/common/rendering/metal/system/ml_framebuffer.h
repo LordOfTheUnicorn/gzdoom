@@ -65,6 +65,7 @@ public:
     void InitializeState() override;
     IDataBuffer *CreateDataBuffer(int bindingpoint, bool ssbo, bool needsresize) override;
     void Update() override;
+    FRenderState* RenderState() override;
     void Swap();
     IVertexBuffer *CreateVertexBuffer() override;
     IIndexBuffer *CreateIndexBuffer() override;
@@ -80,7 +81,7 @@ public:
     //void WriteSavePic(player_t *player, FileWriter *file, int width, int height) override;
 //    sector_t *RenderView(player_t *player) override;
     void SetTextureFilterMode() override;
-//    IHardwareTexture *CreateHardwareTexture() override;
+    IHardwareTexture *CreateHardwareTexture(int numchannels) override;
     //void PrecacheMaterial(FMaterial *mat, int translation) override;
 //    FModelRenderer *CreateModelRenderer(int mli) override;
 //    void TextureFilterChanged() override;

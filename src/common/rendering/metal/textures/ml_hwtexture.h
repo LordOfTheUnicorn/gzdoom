@@ -44,7 +44,7 @@ struct MetalTexFilter
 struct MetalState
 {
     OBJC_ID(MTLTexture)               mTextures;
-    int                                 Id;
+    uint32                            Id;
     //OBJC_ID(MTLSamplerState)          mSamplers;
     //int8_t                       mLastVSTex;
     //int8_t                       mLastPSTex;
@@ -89,11 +89,11 @@ public:
     void UnbindAll();
 
     void BindToFrameBuffer(int w, int h);
-    int FindFreeTexIndex()
+    uint32 FindFreeTexIndex()
     {
         for (int i = 0; i < STATE_TEXTURES_COUNT; i++)
         {
-            if (metalState[i].Id == -1)
+            if (metalState[i].Id == UINT32_MAX)
                 return i;
         }
         return UINT32_MAX;

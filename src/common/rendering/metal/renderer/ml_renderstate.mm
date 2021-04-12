@@ -429,7 +429,7 @@ void MTLRenderState::CreateRenderPipelineState()
 
 bool MTLRenderState::ApplyShader()
 {
-    @autoreleasepool
+//    @autoreleasepool
     {
     static const float nulvec[] = { 0.f, 0.f, 0.f, 0.f };
     MTLVertexBuffer* vertexBuffer = static_cast<MTLVertexBuffer*>(mVertexBuffer);
@@ -766,6 +766,7 @@ void MTLRenderState::EndFrame()
     if (MLRenderer->mScreenBuffers->mDrawable)
         [commandBuffer presentDrawable:MLRenderer->mScreenBuffers->mDrawable];
     
+//    printf("End Frame !\n");
     [renderCommandEncoder endEncoding];    
     [commandBuffer commit];
     currentIndexVB = currentIndexVB == 2 ? 0 : currentIndexVB + 1;
@@ -800,7 +801,7 @@ void MTLRenderState::ApplyMaterial(FMaterial *mat, int clampmode, int translatio
     clampmode = tex->GetClampMode(clampmode);
     
     // avoid rebinding the same texture multiple times.
-    if (mat == lastMaterial && lastClamp == clampmode && translation == lastTranslation) return;
+//    if (mat == lastMaterial && lastClamp == clampmode && translation == lastTranslation) return;
     lastMaterial = mat;
     lastClamp = clampmode;
     lastTranslation = translation;
@@ -816,13 +817,13 @@ void MTLRenderState::ApplyMaterial(FMaterial *mat, int clampmode, int translatio
     {
         if (!(layer->scaleFlags & CTF_Indexed))
         {
-            for (int i = 1; i < numLayers; i++)
-            {
-                auto systex = static_cast<MTLHardwareTexture*>(mat->GetLayer(i, 0, &layer));
-                // fixme: Upscale flags must be disabled for certain layers.
-                systex->BindOrCreate(layer->layerTexture, i, clampmode, 0, layer->scaleFlags, renderCommandEncoder);
-                maxbound = i;
-            }
+            //for (int i = 1; i < numLayers; i++)
+            //{
+            //    auto systex = static_cast<MTLHardwareTexture*>(mat->GetLayer(i, 0, &layer));
+            //    // fixme: Upscale flags must be disabled for certain layers.
+            //    systex->BindOrCreate(layer->layerTexture, i, clampmode, 0, layer->scaleFlags, renderCommandEncoder);
+            //    maxbound = i;
+            //}
         }
         else
         {
@@ -896,7 +897,7 @@ static MTLPrimitiveType dt2ml[] = { MTLPrimitiveTypePoint, MTLPrimitiveTypeLine,
 
 void MTLRenderState::Draw(int dt, int index, int count, bool apply)
 {
-    @autoreleasepool
+//    @autoreleasepool
     {
         if (apply)
         {
@@ -952,7 +953,7 @@ void MTLRenderState::CreateFanToTrisIndexBuffer()
 
 void MTLRenderState::DrawIndexed(int dt, int index, int count, bool apply)
 {
-    @autoreleasepool
+//    @autoreleasepool
     {
         if (apply)
         {

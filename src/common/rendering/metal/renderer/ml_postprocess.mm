@@ -35,6 +35,7 @@
 #include "hw_vrmodes.h"
 #include "hwrenderer/data/flatvertices.h"
 #include "r_videoscale.h"
+#include "v_draw.h"
 
 extern bool vid_hdr_active;
 
@@ -109,7 +110,7 @@ void MTLRenderer::Flush()
             if (eyeCount - eye_ix > 1)
                 mBuffers->NextEye(eyeCount);
         }
-
+       twod->Clear();
 //        screen->Clear2D();
         PresentStereo();
     }
@@ -124,7 +125,7 @@ void MTLRenderer::Flush()
 void MTLRenderer::CopyToBackbuffer(const IntRect *bounds, bool applyGamma)
 {
     screen->Draw2D();    // draw all pending 2D stuff before copying the buffer
-//    screen->Clear2D();
+    twod->Clear();
 
     MTLPPRenderState renderstate(mBuffers);
     hw_postprocess.customShaders.Run(&renderstate, "screen");

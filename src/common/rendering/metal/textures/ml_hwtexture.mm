@@ -158,7 +158,7 @@ unsigned int MTLHardwareTexture::CreateWipeScreen(unsigned char * buffer, int w,
     
     int currentTexId = FindFreeTexIndex();
     
-    if (currentTexId == UINT32_MAX)
+    if (currentTexId == -1)
         assert(true);
     
     metalState[currentTexId].mTextures = [device newTextureWithDescriptor:desc];
@@ -191,13 +191,11 @@ unsigned int MTLHardwareTexture::CreateTexture(unsigned char * buffer, int w, in
 
 unsigned int MTLHardwareTexture::CreateTexture(unsigned char * buffer, int w, int h, int texunit, bool mipmap, const char *name)
 {
-    //nameTex(name);
     int rh,rw;
-    //int texformat = MTLPixelFormatBGRA8Unorm;//GL_RGBA8;// TexFormat[gl_texture_format];
     bool deletebuffer=false;
 
-    rw = w;//GetTexDimension(w);
-    rh = h;//GetTexDimension(h);
+    rw = w;
+    rh = h;
 
     if (!buffer)
     {
@@ -205,7 +203,6 @@ unsigned int MTLHardwareTexture::CreateTexture(unsigned char * buffer, int w, in
         mipmapped = false;
         buffer=(unsigned char *)calloc(4,rw * (rh+1));
         deletebuffer=true;
-        //texheight = -h;
     }
     else
     {
@@ -221,8 +218,6 @@ unsigned int MTLHardwareTexture::CreateTexture(unsigned char * buffer, int w, in
             }
         }
     }
-    
-    
 
     MTLTextureDescriptor *desc = [MTLTextureDescriptor new];
     desc.width = rw;
@@ -262,22 +257,21 @@ unsigned int MTLHardwareTexture::CreateTexture(unsigned char * buffer, int w, in
 
 bool MTLHardwareTexture::BindOrCreate(FTexture *tex, int texunit, int clampmode, int translation, int flags, OBJC_ID(MTLRenderCommandEncoder) encoder)
 {
-    int usebright = false;
-    bool needmipmap = (clampmode <= CLAMP_XY) && !forcenofilter;
-    unsigned int texid;
-    // Bind it to the system.
-    if (!Bind(texunit, needmipmap))
+    if (texunit == -1 && encoder)
     {
-        if (flags & CTF_Indexed)
-        {
-            mlTextureBytes = 1;
-            forcenofilter = true;
-            needmipmap = false;
-        }
-        int w = 0, h = 0;
-
+        [encoder setFragmentTexture:metalState[0].mTextures atIndex:1];
+        MLRenderer->mSamplerManager->BindToShader(encoder);
+        return true;
+    }
+    
+    int usebright = false;
+    int w = 0, h = 0;
+    bool needmipmap = (clampmode <= CLAMP_XY);
+    int texid = Bind(texunit, needmipmap);
+    // Bind it to the system.
+    if (texid == -1)
+    {
         // Create this texture
-        
         FTextureBuffer texbuffer;
 
         if (!tex->isHardwareCanvas())
@@ -291,18 +285,18 @@ bool MTLHardwareTexture::BindOrCreate(FTexture *tex, int texunit, int clampmode,
             w = tex->GetWidth();
             h = tex->GetHeight();
         }
-        
-        texid = CreateTexture(texbuffer.mBuffer, w, h, texunit, needmipmap, "FHardwareTexture.BindOrCreate");
-        
-        if (texid == UINT32_MAX)
-        {
-            // could not create texture
-            return false;
-        }
+        //tex.id or name
+        texid = CreateTexture(texbuffer.mBuffer, w, h, texunit, needmipmap, /*translation,*/ "FHardwareTexture.BindOrCreate");
+        //if (!CreateTexture(texbuffer.mBuffer, w, h, texunit, needmipmap, /*translation,*/ "FHardwareTexture.BindOrCreate"))
+        //{
+        //    // could not create texture
+        //    return false;
+        //}
     }
-    if (forcenofilter && clampmode <= CLAMP_XY) clampmode += CLAMP_NOFILTER - CLAMP_NONE;
-    MLRenderer->mSamplerManager->Bind(texunit, clampmode, 255);
+    if (tex->isHardwareCanvas())
+        static_cast<FCanvasTexture*>(tex)->NeedUpdate();
     
+    FImageSource * t = tex->GetImage();
     MLRenderer->mSamplerManager->Bind(texunit, clampmode, 255);
     if (encoder)
     {
@@ -314,26 +308,26 @@ bool MTLHardwareTexture::BindOrCreate(FTexture *tex, int texunit, int clampmode,
 
 void MTLHardwareTexture::UnbindAll()
 {
-    for (int i = 0; i < STATE_TEXTURES_COUNT; i++)
-    {
-        if (metalState[i].Id != -1)
-        {
-            metalState[i].Id = -1;
-            [metalState[i].mTextures release];
-        }
-    }
+//    for (int i = 0; i < STATE_TEXTURES_COUNT; i++)
+//    {
+//        if (metalState[i].Id != -1)
+//        {
+//            metalState[i].Id = -1;
+//            [metalState[i].mTextures release];
+//        }
+//    }
 }
 
 void MTLHardwareTexture::Unbind(int texunit)
 {
-    for (int i = 0; i < STATE_TEXTURES_COUNT; i++)
-    {
-        if (metalState[i].Id == texunit)
-        {
-            metalState[i].Id = -1;
-            [metalState[i].mTextures release];
-        }
-    }
+//    for (int i = 0; i < STATE_TEXTURES_COUNT; i++)
+//    {
+//        if (metalState[i].Id == texunit)
+//        {
+//            metalState[i].Id = -1;
+//            [metalState[i].mTextures release];
+//        }
+//    }
 }
 
 }
