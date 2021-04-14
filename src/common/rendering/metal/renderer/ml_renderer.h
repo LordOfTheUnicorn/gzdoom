@@ -102,7 +102,6 @@ public:
     unsigned int PortalQueryObject;
     unsigned int mStencilValue = 0;
     dispatch_semaphore_t semaphore;
-    
     MTLRenderState *ml_RenderState;
     
     mtlHWViewpointUniforms *mHWViewpointUniforms;

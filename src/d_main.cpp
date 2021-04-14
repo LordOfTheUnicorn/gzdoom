@@ -210,7 +210,7 @@ CUSTOM_CVAR(Float, i_timescale, 1.0f, CVAR_NOINITCALL | CVAR_VIRTUAL)
 	else if (self >= 0.05f)
 	{
 		I_FreezeTime(true);
-		TimeScale = self;
+		_TimeScale = self;
 		I_FreezeTime(false);
 	}
 	else
@@ -1191,6 +1191,9 @@ void D_Display ()
 			done = wiper->Run(1);
 			C_DrawConsole ();	// console and
 			M_Drawer ();			// menu are drawn even on top of wipes
+#ifdef HAVE_METAL
+            screen->BeginFrame();
+#endif
 			End2DAndUpdate ();
 			NetUpdate ();			// [RH] not sure this is needed anymore
 		} while (!done);

@@ -38,13 +38,14 @@
 #include "metal/renderer/ml_renderer.h"
 #include "metal/renderer/ml_renderstate.h"
 #include "metal/renderer/ml_renderbuffers.h"
+#include "metal/system/MetalCocoaView.h"
 
 #include "v_text.h"
+MetalCocoaView* GetMacWindow();
 
 EXTERN_CVAR(Bool, r_drawvoxels)
 EXTERN_CVAR(Int, gl_tonemap)
 void Draw2D(F2DDrawer *drawer, FRenderState &state);
-//MetalCocoaView* GetMacWindow();
 
 namespace MetalRenderer
 {
@@ -222,6 +223,10 @@ IIndexBuffer *MetalFrameBuffer::CreateIndexBuffer()
 void MetalFrameBuffer::SetVSync(bool vsync)
 {
     cur_vsync = vsync;
+    if (@available(macOS 10.13, *))
+    {
+        [[GetMacWindow() getMetalLayer] setDisplaySyncEnabled:cur_vsync];
+    }
 }
 
 //void MetalFrameBuffer::PostProcessScene(int fixedcm, const std::function<void()> &afterBloomDrawEndScene2D)
@@ -332,8 +337,7 @@ FTexture* MetalFrameBuffer::WipeStartScreen()
 
 FTexture* MetalFrameBuffer::WipeEndScreen()
 {
-//    return nullptr;
-//    MLRenderer->Flush();
+
     [MLRenderer->ml_RenderState->renderCommandEncoder endEncoding];
     [MLRenderer->ml_RenderState->commandBuffer commit];
     const auto &viewport = screen->mScreenViewport;
@@ -360,8 +364,7 @@ FTexture* MetalFrameBuffer::WipeEndScreen()
            systex->CreateWipeScreen((unsigned char *)buff.contents, viewport.width, viewport.height, 0, false, "WipeEndScreen");
            [buff release];
     }
-    //
-//    screen->BeginFrame();
+    
     return tex;
 }
 
