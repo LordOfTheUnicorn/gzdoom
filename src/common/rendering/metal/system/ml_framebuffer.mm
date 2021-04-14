@@ -77,7 +77,7 @@ void MetalFrameBuffer::BeginFrame()
     SetViewportRects(nullptr);
     if (MLRenderer != nullptr)
     {
-        //dispatch_semaphore_wait(MLRenderer->semaphore, DISPATCH_TIME_FOREVER);
+        dispatch_semaphore_wait(MLRenderer->semaphore, DISPATCH_TIME_FOREVER);
         MLRenderer->BeginFrame();
 //        printf("Begin Frame !\n");
         if (true)
@@ -90,8 +90,8 @@ void MetalFrameBuffer::BeginFrame()
                 if (MLRenderer->mScreenBuffers->mSceneFB == nil)
                 {
                     MTLTextureDescriptor *desc = [MTLTextureDescriptor new];
-                    desc.width  = GetMetalFrameBuffer()->GetClientWidth();
-                    desc.height = GetMetalFrameBuffer()->GetClientHeight();
+                    desc.width  = screen->mOutputLetterbox.width;
+                    desc.height = screen->mOutputLetterbox.height;
                     desc.pixelFormat = MTLPixelFormatRGBA16Float;
                     desc.storageMode = MTLStorageModePrivate;
                     desc.usage = MTLTextureUsageRenderTarget | MTLTextureUsageShaderWrite | MTLTextureUsageShaderRead;
@@ -116,13 +116,9 @@ void MetalFrameBuffer::BeginFrame()
             renderPassDescriptor.depthAttachment.clearDepth = 1.f;
             renderPassDescriptor.stencilAttachment.loadAction = MTLLoadActionClear;
             renderPassDescriptor.stencilAttachment.clearStencil = 0.f;
-            auto fb = GetMetalFrameBuffer();
             
-            auto val1 = fb->GetClientWidth();
-            auto val2 = fb->GetClientHeight();
-            
-            renderPassDescriptor.renderTargetWidth = GetMetalFrameBuffer()->GetClientWidth();
-            renderPassDescriptor.renderTargetHeight = GetMetalFrameBuffer()->GetClientHeight();
+            renderPassDescriptor.renderTargetWidth  = screen->mOutputLetterbox.width;
+            renderPassDescriptor.renderTargetHeight = screen->mOutputLetterbox.height;
             renderPassDescriptor.defaultRasterSampleCount = 1;
     
             needCreateRenderState = false;
@@ -304,7 +300,7 @@ FRenderState* MetalFrameBuffer::RenderState()
 
 FTexture* MetalFrameBuffer::WipeStartScreen()
 {
-    return nullptr;
+//    return nullptr;
     const auto &viewport = screen->mScreenViewport;
     
     auto tex = new FWrapperTexture(viewport.width, viewport.height, 1);
@@ -336,8 +332,8 @@ FTexture* MetalFrameBuffer::WipeStartScreen()
 
 FTexture* MetalFrameBuffer::WipeEndScreen()
 {
-    return nullptr;
-    MLRenderer->Flush();
+//    return nullptr;
+//    MLRenderer->Flush();
     [MLRenderer->ml_RenderState->renderCommandEncoder endEncoding];
     [MLRenderer->ml_RenderState->commandBuffer commit];
     const auto &viewport = screen->mScreenViewport;
@@ -365,7 +361,7 @@ FTexture* MetalFrameBuffer::WipeEndScreen()
            [buff release];
     }
     //
-    screen->BeginFrame();
+//    screen->BeginFrame();
     return tex;
 }
 

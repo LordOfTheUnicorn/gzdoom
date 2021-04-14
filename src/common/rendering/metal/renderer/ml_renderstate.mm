@@ -688,7 +688,7 @@ void MTLRenderState::CreateRenderState(MTLRenderPassDescriptor * renderPassDescr
     [renderCommandEncoder setCullMode:MTLCullModeNone];
     [renderCommandEncoder setViewport:(MTLViewport)
     {   0.0, 0.0,
-        (double)GetMetalFrameBuffer()->GetClientWidth(), (double)GetMetalFrameBuffer()->GetClientHeight(),
+        (double)screen->mOutputLetterbox.width, (double)screen->mOutputLetterbox.height,
         0.0, 1.0 }];
     //CreateFanToTrisIndexBuffer();
     //needSetUniforms = true;
@@ -897,7 +897,7 @@ static MTLPrimitiveType dt2ml[] = { MTLPrimitiveTypePoint, MTLPrimitiveTypeLine,
 
 void MTLRenderState::Draw(int dt, int index, int count, bool apply)
 {
-//    @autoreleasepool
+    @autoreleasepool
     {
         if (apply)
         {
@@ -953,7 +953,7 @@ void MTLRenderState::CreateFanToTrisIndexBuffer()
 
 void MTLRenderState::DrawIndexed(int dt, int index, int count, bool apply)
 {
-//    @autoreleasepool
+    @autoreleasepool
     {
         if (apply)
         {
@@ -1139,8 +1139,8 @@ void MTLRenderState::SetScissor(int x, int y, int w, int h)
     {
         [renderCommandEncoder setScissorRect:{static_cast<NSUInteger>(x),
                                               static_cast<NSUInteger>(y),
-                                              static_cast<NSUInteger>(w-x),
-                                              static_cast<NSUInteger>(h-y)}];
+                                              static_cast<NSUInteger>(w),
+                                              static_cast<NSUInteger>(h - y)}];
     }
 }
 
@@ -1179,19 +1179,19 @@ void MTLRenderState::EnableLineSmooth(bool on)
 //==========================================================================
 void MTLRenderState::ClearScreen()
 {
-    bool multi = !!glIsEnabled(GL_MULTISAMPLE);
-
-    screen->mViewpoints->Set2D(*this, SCREENWIDTH, SCREENHEIGHT);
-    SetColor(0, 0, 0);
-    Apply();
-
-    glDisable(GL_MULTISAMPLE);
-    glDisable(GL_DEPTH_TEST);
-
-    glDrawArrays(GL_TRIANGLE_STRIP, FFlatVertexBuffer::FULLSCREEN_INDEX, 4);
-
-    glEnable(GL_DEPTH_TEST);
-    if (multi) glEnable(GL_MULTISAMPLE);
+//    bool multi = !!glIsEnabled(GL_MULTISAMPLE);
+//
+//    screen->mViewpoints->Set2D(*this, SCREENWIDTH, SCREENHEIGHT);
+//    SetColor(0, 0, 0);
+//    Apply();
+//
+//    glDisable(GL_MULTISAMPLE);
+//    glDisable(GL_DEPTH_TEST);
+//
+//    glDrawArrays(GL_TRIANGLE_STRIP, FFlatVertexBuffer::FULLSCREEN_INDEX, 4);
+//
+//    glEnable(GL_DEPTH_TEST);
+//    if (multi) glEnable(GL_MULTISAMPLE);
 }
 
 

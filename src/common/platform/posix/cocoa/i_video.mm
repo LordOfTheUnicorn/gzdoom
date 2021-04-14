@@ -40,7 +40,6 @@
 #endif
 
 #include "i_common.h"
-#define HAVE_METAL
 #include "v_video.h"
 #include "bitmap.h"
 #include "c_dispatch.h"
@@ -461,9 +460,15 @@ public:
 		else
 #endif
 		{
+#ifdef HAVE_METAL
             if (fb == nullptr)
                 fb = new MetalRenderer::MetalFrameBuffer(nullptr, vid_fullscreen);
-            const NSRect rect = [ms_window contentRectForFrameRect:[ms_window frame]];
+            
+            fb->SetWindow(ms_window);
+            fb->SetMode(vid_fullscreen, vid_hidpi);
+            fb->SetSize(fb->GetClientWidth(), fb->GetClientHeight());
+            
+            const NSRect rect = NSRect{0,0,static_cast<CGFloat>(fb->GetClientWidth()), static_cast<CGFloat>(fb->GetClientHeight())};
             MetalRenderer::m_view = [[MetalCocoaView alloc] initWithFrame:rect device:MetalRenderer::device vsync:YES Str:@"NewView"];
             [ms_window setContentView:(NSView*)MetalRenderer::m_view];
             [ms_window setDelegate:(MetalCocoaView*)MetalRenderer::m_view];
@@ -471,7 +476,7 @@ public:
 
 //            SetupOpenGLView(ms_window, OpenGLProfile::Core);
 		}
-
+#else
 		if (fb == nullptr)
 		{
 			fb = new OpenGLRenderer::OpenGLFrameBuffer(0, vid_fullscreen);
@@ -480,7 +485,8 @@ public:
 		fb->SetWindow(ms_window);
 		fb->SetMode(vid_fullscreen, vid_hidpi);
 		fb->SetSize(fb->GetClientWidth(), fb->GetClientHeight());
-
+#endif // HAVE_METAL
+        
 #ifdef HAVE_VULKAN
 		// This lame hack is a temporary workaround for strange performance issues
 		// with fullscreen window and Core Animation's Metal layer
@@ -609,14 +615,14 @@ int SystemBaseFrameBuffer::GetTitleBarHeight() const
 
 int SystemBaseFrameBuffer::GetClientWidth()
 {
-//	const int clientWidth = I_GetContentViewSize(m_window).width;
-    return 1440;//clientWidth > 0 ? clientWidth : GetWidth();
+	const int clientWidth = I_GetContentViewSize(m_window).width;
+    return clientWidth > 0 ? clientWidth : GetWidth();
 }
 
 int SystemBaseFrameBuffer::GetClientHeight()
 {
-//	const int clientHeight = I_GetContentViewSize(m_window).height;
-    return 900;//clientHeight > 0 ? clientHeight : GetHeight();
+	const int clientHeight = I_GetContentViewSize(m_window).height;
+    return clientHeight > 0 ? clientHeight : GetHeight();
 }
 
 
@@ -668,6 +674,7 @@ void SystemBaseFrameBuffer::SetWindowedMode()
 
 void SystemBaseFrameBuffer::SetMode(const bool fullscreen, const bool hiDPI)
 {
+#ifndef HAVE_METAL
 	if ([m_window.contentView isKindOfClass:[OpenGLCocoaView class]])
 	{
 		NSOpenGLView* const glView = [m_window contentView];
@@ -679,7 +686,8 @@ void SystemBaseFrameBuffer::SetMode(const bool fullscreen, const bool hiDPI)
 		assert([m_window.contentView layer] != nil);
 		[m_window.contentView layer].contentsScale = hiDPI ? m_window.screen.backingScaleFactor : 1.0;
 	}
-
+#endif // !HAVE_METAL
+    
 	if (vid_nativefullscreen && fullscreen != m_fullscreen)
 	{
 		[m_window toggleFullScreen:(nil)];

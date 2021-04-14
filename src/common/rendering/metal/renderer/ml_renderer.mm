@@ -409,8 +409,8 @@ void MTLRenderer::RenderScreenQuad()
     passDesc.stencilAttachment.storeAction = MTLStoreActionDontCare;
     passDesc.stencilAttachment.clearStencil = 0.f;
     
-    passDesc.renderTargetWidth  = GetMetalFrameBuffer()->GetClientWidth();//mOutputLetterbox.width;
-    passDesc.renderTargetHeight = GetMetalFrameBuffer()->GetClientHeight();//mOutputLetterbox.height;
+    passDesc.renderTargetWidth  = screen->mOutputLetterbox.width;
+    passDesc.renderTargetHeight = screen->mOutputLetterbox.height;
     passDesc.defaultRasterSampleCount = 1;
     
     [MLRenderer->ml_RenderState->renderCommandEncoder endEncoding];
@@ -422,7 +422,7 @@ void MTLRenderer::RenderScreenQuad()
     
     [MLRenderer->ml_RenderState->renderCommandEncoder setViewport:(MTLViewport)
     {   0.0, 0.0,
-        (double)GetMetalFrameBuffer()->GetClientWidth(), (double)GetMetalFrameBuffer()->GetClientHeight(),
+        (double)screen->mOutputLetterbox.width, (double)screen->mOutputLetterbox.height,
         0.0, 1.0
     }];
     
@@ -537,10 +537,10 @@ void MTLRenderer::RenderScreenQuad()
                                                           indexBufferOffset:0];
     [buff release];
     
-    //[MLRenderer->ml_RenderState->commandBuffer addCompletedHandler:^(OBJC_ID(MTLCommandBuffer) buffer)
-    //{
-    //    dispatch_semaphore_signal(MLRenderer->semaphore);
-    //}];
+    [MLRenderer->ml_RenderState->commandBuffer addCompletedHandler:^(OBJC_ID(MTLCommandBuffer) buffer)
+    {
+        dispatch_semaphore_signal(MLRenderer->semaphore);
+    }];
 }
 
 //void MetalFrameBuffer::CleanForRestart()

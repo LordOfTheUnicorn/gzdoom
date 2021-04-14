@@ -63,17 +63,17 @@ void MTLRenderBuffers::CreatePipeline(int width, int height)
 {
     auto fb = GetMetalFrameBuffer();
 
-    for (int i = 0; i < NumPipelineImages; i++)
-    {
-        MTLTextureDescriptor *desc = [MTLTextureDescriptor new];
-        desc.width = fb->GetClientWidth();
-        desc.height = fb->GetClientHeight();
-        desc.pixelFormat = MTLPixelFormatRGBA16Float;//MTLPixelFormatRGBA16Float;
-        desc.usage = MTLTextureUsageShaderWrite | MTLTextureUsageShaderRead;
-        PipelineImage[i] = [device newTextureWithDescriptor:desc];
-        
-        [desc release];
-    }
+//    for (int i = 0; i < NumPipelineImages; i++)
+//    {
+//        MTLTextureDescriptor *desc = [MTLTextureDescriptor new];
+//        desc.width  = fb->GetClientWidth();
+//        desc.height = fb->GetClientHeight();
+//        desc.pixelFormat = MTLPixelFormatRGBA16Float;//MTLPixelFormatRGBA16Float;
+//        desc.usage = MTLTextureUsageShaderWrite | MTLTextureUsageShaderRead;
+//        PipelineImage[i] = [device newTextureWithDescriptor:desc];
+//        
+//        [desc release];
+//    }
 }
 
 void MTLRenderBuffers::BindDitherTexture(int texunit)
@@ -190,7 +190,7 @@ void MTLRenderBuffers::CreateScene(int width, int height, int samples, bool need
     ClearScene(); 
     auto fb = GetMetalFrameBuffer();
     
-    mSceneDepthStencilTex = CreateDepthTexture("mSceneDepthTex", MTLPixelFormatDepth32Float_Stencil8, fb->GetClientWidth(), fb->GetClientHeight(), 0, 0);
+    mSceneDepthStencilTex = CreateDepthTexture("mSceneDepthTex", MTLPixelFormatDepth32Float_Stencil8, screen->mOutputLetterbox.width, screen->mOutputLetterbox.height, 0, 0);
     mSceneFogTex = Create2DTexture("SceneFog", MTLPixelFormatRGBA8Unorm, width, height);
     mSceneNormalTex = Create2DTexture("SceneNormal", MTLPixelFormatRGB10A2Unorm, width, height);
     mSceneDepthStencilBuf = Create2DTexture("SceneDepthStencil", MTLPixelFormatDepth32Float_Stencil8, width, height);

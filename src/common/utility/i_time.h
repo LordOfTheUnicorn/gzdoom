@@ -3,7 +3,7 @@
 #include <stdint.h>
 
 extern int GameTicRate;
-extern double TimeScale;
+extern double _TimeScale;
 
 // Called by D_DoomLoop, sets the time for the current frame
 void I_SetFrameTime();

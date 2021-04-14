@@ -429,6 +429,7 @@ void F2DDrawer::AddTexture(FGameTexture* img, DrawParms& parms)
 	u2 = parms.srcx + parms.srcwidth;
 	v2 = parms.srcy + parms.srcheight;
 
+#ifndef HAVE_METAL
 	if (parms.flipX)
 	{
 		std::swap(u1, u2);
@@ -438,6 +439,7 @@ void F2DDrawer::AddTexture(FGameTexture* img, DrawParms& parms)
 	{
 		std::swap(v1, v2);
 	}
+#endif // !HAVE_METAL
 
 	auto osave = offset;
 	if (parms.nooffset) offset = { 0,0 };
