@@ -133,7 +133,7 @@ void D_DoAnonStats();
 void I_DetectOS();
 void UpdateGenericUI(bool cvar);
 
-
+#define HAVE_METAL
 // MACROS ------------------------------------------------------------------
 
 // TYPES -------------------------------------------------------------------

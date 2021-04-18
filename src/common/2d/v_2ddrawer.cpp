@@ -31,7 +31,7 @@
 **---------------------------------------------------------------------------
 **
 */
-
+#define HAVE_METAL
 #include <stdarg.h>
 #include "templates.h"
 #include "v_2ddrawer.h"

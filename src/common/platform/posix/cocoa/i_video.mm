@@ -40,6 +40,7 @@
 #endif
 
 #include "i_common.h"
+#define HAVE_METAL
 #include "v_video.h"
 #include "bitmap.h"
 #include "c_dispatch.h"
@@ -687,7 +688,6 @@ void SystemBaseFrameBuffer::SetMode(const bool fullscreen, const bool hiDPI)
 		[m_window.contentView layer].contentsScale = hiDPI ? m_window.screen.backingScaleFactor : 1.0;
 	}
 #endif // !HAVE_METAL
-    
 	if (vid_nativefullscreen && fullscreen != m_fullscreen)
 	{
 		[m_window toggleFullScreen:(nil)];
