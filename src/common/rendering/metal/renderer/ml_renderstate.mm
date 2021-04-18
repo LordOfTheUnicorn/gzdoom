@@ -141,6 +141,16 @@ void MTLRenderState::ApplyState()
     {
         ApplyMaterial(mMaterial.mMaterial, mMaterial.mClampMode, mMaterial.mTranslation, mMaterial.mOverrideShader);
         mMaterial.mChanged = false;
+        
+        if(mMaterial.mMaterial && mTextureEnabled)
+        {
+            int index = mMaterial.mMaterial->Source()->GetID().GetIndex();
+            for(int i = 0; i < STATE_TEXTURES_COUNT; i++)
+            {
+                if (MLRenderer->metalTextures[i].Id == index)
+                    [renderCommandEncoder setFragmentTexture:MLRenderer->metalTextures[i].mTextures atIndex:1];
+            }
+        }
     }
 
 
@@ -429,7 +439,7 @@ void MTLRenderState::CreateRenderPipelineState()
 
 bool MTLRenderState::ApplyShader()
 {
-//    @autoreleasepool
+    @autoreleasepool
     {
     static const float nulvec[] = { 0.f, 0.f, 0.f, 0.f };
     MTLVertexBuffer* vertexBuffer = static_cast<MTLVertexBuffer*>(mVertexBuffer);
@@ -801,7 +811,7 @@ void MTLRenderState::ApplyMaterial(FMaterial *mat, int clampmode, int translatio
     clampmode = tex->GetClampMode(clampmode);
     
     // avoid rebinding the same texture multiple times.
-//    if (mat == lastMaterial && lastClamp == clampmode && translation == lastTranslation) return;
+    if (mat == lastMaterial && lastClamp == clampmode && translation == lastTranslation) return;
     lastMaterial = mat;
     lastClamp = clampmode;
     lastTranslation = translation;
@@ -813,7 +823,7 @@ void MTLRenderState::ApplyMaterial(FMaterial *mat, int clampmode, int translatio
     MaterialLayerInfo* layer;
     auto base = static_cast<MTLHardwareTexture*>(mat->GetLayer(0, translation, &layer));
 
-    if (base->BindOrCreate(tex->GetTexture(), 0, clampmode, translation, layer->scaleFlags, renderCommandEncoder))
+    if (base->BindOrCreate(tex->GetTexture(), tex->GetID().GetIndex(), clampmode, translation, layer->scaleFlags))
     {
         if (!(layer->scaleFlags & CTF_Indexed))
         {

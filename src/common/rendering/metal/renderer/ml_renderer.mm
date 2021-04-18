@@ -95,6 +95,9 @@ MTLRenderer::MTLRenderer(MetalFrameBuffer *fb)
     mHWViewpointUniforms = new mtlHWViewpointUniforms();
     loadDepthStencil = false;
     semaphore = dispatch_semaphore_create(3);
+    
+    for (int i = 0; i < STATE_TEXTURES_COUNT; i++)
+        metalTextures[i].Id = UINT32_MAX;
 }
 
 void MTLRenderer::Initialize(int width, int height, OBJC_ID(MTLDevice) device)

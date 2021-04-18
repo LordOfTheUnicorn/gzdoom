@@ -38,6 +38,9 @@
 #pragma warning(disable:4244)
 #endif
 
+#define STATE_TEXTURES_COUNT 256
+#define STATE_SAMPLERS_COUNT 256
+
 struct particle_t;
 class FCanvasTexture;
 class FFlatVertexBuffer;
@@ -87,11 +90,18 @@ struct mtlHWViewpointUniforms
     int     mShadowmapFilter;
 };
 
+struct MetalTexture
+{
+    OBJC_ID(MTLTexture)               mTextures;
+    uint32                            Id;
+};
+
 class MTLRenderer
 {
     void RenderTextureView(FCanvasTexture* tex, std::function<void(IntRect &)> renderFunc);
+    
 public:
-
+    MetalTexture metalTextures[STATE_TEXTURES_COUNT];
     MetalFrameBuffer *framebuffer;
     int mMirrorCount = 0;
     int mPlaneMirrorCount = 0;
@@ -108,16 +118,14 @@ public:
 
     int mOldFBID;
 
-    MTLRenderBuffers *mBuffers = nullptr;
-    MTLRenderBuffers *mScreenBuffers = nullptr;
-    MTLRenderBuffers *mSaveBuffers = nullptr;
-    PresentUniforms *mPresentShader = nullptr;;
+    MTLRenderBuffers *mBuffers                = nullptr;
+    MTLRenderBuffers *mScreenBuffers          = nullptr;
+    MTLRenderBuffers *mSaveBuffers            = nullptr;
+    PresentUniforms  *mPresentShader          = nullptr;
     MTLShaderProgram *mPresent3dCheckerShader = nullptr;
-    MTLShaderProgram *mPresent3dColumnShader = nullptr;
-    MTLShaderProgram *mPresent3dRowShader = nullptr;
+    MTLShaderProgram *mPresent3dColumnShader  = nullptr;
+    MTLShaderProgram *mPresent3dRowShader     = nullptr;
     bool loadDepthStencil : 1;
-
-    //FRotator mAngles;
 
     SWSceneDrawer *swdrawer = nullptr;
 
@@ -125,9 +133,7 @@ public:
     ~MTLRenderer();
 
     void Initialize(int width, int height, OBJC_ID(MTLDevice) device);
-
     void ClearBorders();
-
     void ResetSWScene();
 
     void PresentStereo() {raise(SIGTRAP);};
@@ -143,18 +149,13 @@ public:
     void WriteSavePic(player_t *player, FileWriter *file, int width, int height);
     sector_t *RenderView(player_t *player);
     void BeginFrame();
-    
     sector_t *RenderViewpoint (FRenderViewpoint &mainvp, AActor * camera, IntRect * bounds, float fov, float ratio, float fovratio, bool mainview, bool toscreen);
-
-
     bool StartOffscreen();
     void EndOffscreen();
     void UpdateShadowMap();
-
     void BindToFrameBuffer(FTexture *mat);
 
 private:
-
     void DrawScene(HWDrawInfo *di, int drawmode);
     bool QuadStereoCheckInitialRenderContextState();
     void PresentAnaglyph(bool r, bool g, bool b);
@@ -172,7 +173,7 @@ struct TexFilter_s
     int minfilter;
     int magfilter;
     bool mipmapping;
-} ;
+};
 
 extern MTLRenderer *MLRenderer;
 }

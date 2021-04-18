@@ -25,37 +25,19 @@
 #include "tarray.h"
 #include "hw_ihwtexture.h"
 #include "metal/system/ml_buffer.h"
-#import <Metal/Metal.h>
+#include "metal/renderer/ml_renderer.h"
+#import  <Metal/Metal.h>
 
 
 
 namespace MetalRenderer
 {
-static const uint8_t STATE_TEXTURES_COUNT     = 16;
-static const uint8_t STATE_SAMPLERS_COUNT     = 16;
 
 struct MetalTexFilter
 {
     MTLSamplerMinMagFilter minfilter;
     MTLSamplerMinMagFilter magfilter;
     bool mipmapping;
-} ;
-
-struct MetalState
-{
-    OBJC_ID(MTLTexture)               mTextures;
-    uint32                            Id;
-    //OBJC_ID(MTLSamplerState)          mSamplers;
-    //int8_t                       mLastVSTex;
-    //int8_t                       mLastPSTex;
-    //int8_t                       mLastVSSampler;
-    //int8_t                       mLastPSSampler;
-    //int                          mFormat;
-    //int                          mSize;
-    //int8_t                       mUsageFlags;
-    //size_t                       mOffset;
-    //int                          mWidth;
-    //int                          mHeight;
 };
 
 struct offsetSize
@@ -72,13 +54,8 @@ private:
     int mlTextureBytes = 4;
     bool mipmapped = false;
     MTLBuffer *mBuffer;
-    MetalState metalState[STATE_TEXTURES_COUNT];
-    OBJC_ID(MTLTexture)               mTextures;
-    //int currentTexId;
     int mBufferSize = 0;
-    //OBJC_ID(MTLTexture) mTex;
     NSString *nameTex;
-    //std::vector<offsetSize> mOffsetSize;
     int GetDepthBuffer(int w, int h);
 
 public:
@@ -89,15 +66,7 @@ public:
     void UnbindAll();
 
     void BindToFrameBuffer(int w, int h);
-    uint32 FindFreeTexIndex()
-    {
-        for (int i = 0; i < STATE_TEXTURES_COUNT; i++)
-        {
-            if (metalState[i].Id == UINT32_MAX)
-                return i;
-        }
-        return UINT32_MAX;
-    }
+    uint32 FindFreeTexIndex();
 
   //  unsigned int Bind(int texunit, bool needmipmap);
   //  bool BindOrCreate(FTexture *tex, int texunit, int clampmode, int translation, int flags);
@@ -111,7 +80,7 @@ public:
     unsigned int CreateTexture(unsigned char * buffer, int w, int h, int texunit, bool mipmap, const char *name);
     void ResetAll();
     void Reset(size_t id);
-    bool BindOrCreate(FTexture *tex, int texunit, int clampmode, int translation, int flags, OBJC_ID(MTLRenderCommandEncoder) encoder);
+    bool BindOrCreate(FTexture *tex, int texunit, int clampmode, int translation, int flags);
     int Bind(int texunit, bool needmipmap);
  //   unsigned int GetTextureHandle(int translation);
 };

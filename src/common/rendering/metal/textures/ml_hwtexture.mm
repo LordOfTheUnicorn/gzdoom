@@ -61,9 +61,6 @@ int TexFormat[]={
 
 MTLHardwareTexture::MTLHardwareTexture()
 {
-    for (int i = 0; i < STATE_TEXTURES_COUNT; i++)
-        metalState[i].Id = -1;
-    
     mBuffer = new MTLBuffer();
 };
 
@@ -87,6 +84,15 @@ void MTLHardwareTexture::AllocateBuffer(int w, int h, int texelsize)
     bufferpitch = w;
 }
 
+uint32 MTLHardwareTexture::FindFreeTexIndex()
+{
+    for (int i = 0; i < STATE_TEXTURES_COUNT; i++)
+    {
+        if (MLRenderer->metalTextures[i].Id == UINT32_MAX)
+            return i;
+    }
+    return UINT32_MAX;
+};
 
 uint8_t* MTLHardwareTexture::MapBuffer()
 {
@@ -107,7 +113,7 @@ int MTLHardwareTexture::Bind(int texunit, bool needmipmap)
 {
     for (int i = 0; i < STATE_TEXTURES_COUNT; i++)
     {
-        if (metalState[i].Id == texunit)
+        if (MLRenderer->metalTextures[i].Id == texunit)
         {
             return i;
         }
@@ -158,17 +164,17 @@ unsigned int MTLHardwareTexture::CreateWipeScreen(unsigned char * buffer, int w,
     
     int currentTexId = FindFreeTexIndex();
     
-    if (currentTexId == -1)
+    if (currentTexId == UINT32_MAX)
         assert(true);
     
-    metalState[currentTexId].mTextures = [device newTextureWithDescriptor:desc];
-    metalState[currentTexId].Id = texunit;
+    MLRenderer->metalTextures[currentTexId].mTextures = [device newTextureWithDescriptor:desc];
+    MLRenderer->metalTextures[currentTexId].Id = texunit;
     [desc release];
     
     if(buffer)
     {
         MTLRegion region = MTLRegionMake2D(0, 0, rw, rh);
-        [metalState[currentTexId].mTextures replaceRegion:region mipmapLevel:0 withBytes:buffer bytesPerRow:(8*rw)];
+        [MLRenderer->metalTextures[currentTexId].mTextures replaceRegion:region mipmapLevel:0 withBytes:buffer bytesPerRow:(8*rw)];
     }
 
 
@@ -230,17 +236,17 @@ unsigned int MTLHardwareTexture::CreateTexture(unsigned char * buffer, int w, in
     
     int currentTexId = FindFreeTexIndex();
     
-    if (currentTexId == -1)
+    if (currentTexId == UINT32_MAX)
         assert(true);
     
-    metalState[currentTexId].mTextures = [device newTextureWithDescriptor:desc];
-    metalState[currentTexId].Id = texunit;
+    MLRenderer->metalTextures[currentTexId].mTextures = [device newTextureWithDescriptor:desc];
+    MLRenderer->metalTextures[currentTexId].Id = texunit;
     [desc release];
     
     if(buffer)
     {
         MTLRegion region = MTLRegionMake2D(0, 0, rw, rh);
-        [metalState[currentTexId].mTextures replaceRegion:region mipmapLevel:0 withBytes:buffer bytesPerRow:(4*rw)];
+        [MLRenderer->metalTextures[currentTexId].mTextures replaceRegion:region mipmapLevel:0 withBytes:buffer bytesPerRow:(4*rw)];
     }
 
 
@@ -255,15 +261,8 @@ unsigned int MTLHardwareTexture::CreateTexture(unsigned char * buffer, int w, in
     return currentTexId;
 }
 
-bool MTLHardwareTexture::BindOrCreate(FTexture *tex, int texunit, int clampmode, int translation, int flags, OBJC_ID(MTLRenderCommandEncoder) encoder)
+bool MTLHardwareTexture::BindOrCreate(FTexture *tex, int texunit, int clampmode, int translation, int flags)
 {
-    if (texunit == -1 && encoder)
-    {
-        [encoder setFragmentTexture:metalState[0].mTextures atIndex:1];
-        MLRenderer->mSamplerManager->BindToShader(encoder);
-        return true;
-    }
-    
     int usebright = false;
     int w = 0, h = 0;
     bool needmipmap = (clampmode <= CLAMP_XY);
@@ -298,36 +297,31 @@ bool MTLHardwareTexture::BindOrCreate(FTexture *tex, int texunit, int clampmode,
     
     FImageSource * t = tex->GetImage();
     MLRenderer->mSamplerManager->Bind(texunit, clampmode, 255);
-    if (encoder)
-    {
-        [encoder setFragmentTexture:metalState[texid].mTextures atIndex:1];
-        MLRenderer->mSamplerManager->BindToShader(encoder);
-    }
     return true;
 }
 
 void MTLHardwareTexture::UnbindAll()
 {
-//    for (int i = 0; i < STATE_TEXTURES_COUNT; i++)
-//    {
-//        if (metalState[i].Id != -1)
-//        {
-//            metalState[i].Id = -1;
-//            [metalState[i].mTextures release];
-//        }
-//    }
+    for (int i = 0; i < STATE_TEXTURES_COUNT; i++)
+    {
+        if (MLRenderer->metalTextures[i].Id != UINT32_MAX)
+        {
+            MLRenderer->metalTextures[i].Id = UINT32_MAX;
+            [MLRenderer->metalTextures[i].mTextures release];
+        }
+    }
 }
 
 void MTLHardwareTexture::Unbind(int texunit)
 {
-//    for (int i = 0; i < STATE_TEXTURES_COUNT; i++)
-//    {
-//        if (metalState[i].Id == texunit)
-//        {
-//            metalState[i].Id = -1;
-//            [metalState[i].mTextures release];
-//        }
-//    }
+    for (int i = 0; i < STATE_TEXTURES_COUNT; i++)
+    {
+        if (MLRenderer->metalTextures[i].Id == texunit)
+        {
+            MLRenderer->metalTextures[i].Id = UINT32_MAX;
+            [MLRenderer->metalTextures[i].mTextures release];
+        }
+    }
 }
 
 }
