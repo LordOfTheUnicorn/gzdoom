@@ -311,7 +311,7 @@ FTexture* MetalFrameBuffer::WipeStartScreen()
     auto tex = new FWrapperTexture(viewport.width, viewport.height, 1);
     auto systex = static_cast<MTLHardwareTexture*>(tex->GetSystemTexture());
     MTLRegion region = MTLRegionMake2D(0, 0, viewport.width, viewport.height);
-//    @autoreleasepool
+    @autoreleasepool
     {
         OBJC_ID(MTLCommandBuffer)localCommandBuffer = [MLRenderer->ml_RenderState->commandQueue commandBuffer];
         OBJC_ID(MTLBlitCommandEncoder) blit = [localCommandBuffer blitCommandEncoder];
@@ -343,7 +343,7 @@ FTexture* MetalFrameBuffer::WipeEndScreen()
     const auto &viewport = screen->mScreenViewport;
     auto tex = new FWrapperTexture(viewport.width, viewport.height, 1);
     auto systex = static_cast<MTLHardwareTexture*>(tex->GetSystemTexture());
-//    @autoreleasepool
+    @autoreleasepool
     {
            OBJC_ID(MTLCommandBuffer)localCommandBuffer = [MLRenderer->ml_RenderState->commandQueue commandBuffer];
            OBJC_ID(MTLBlitCommandEncoder) blit = [localCommandBuffer blitCommandEncoder];

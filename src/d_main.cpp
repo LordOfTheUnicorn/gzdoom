@@ -1258,62 +1258,65 @@ void D_DoomLoop ()
 
 	for (;;)
 	{
-		try
-		{
-			// frame syncronous IO operations
-			if (gametic > lasttic)
-			{
-				lasttic = gametic;
-				I_StartFrame ();
-			}
-			I_SetFrameTime();
+        @autoreleasepool
+        {
+            try
+            {
+                // frame syncronous IO operations
+                if (gametic > lasttic)
+                {
+                    lasttic = gametic;
+                    I_StartFrame ();
+                }
+                I_SetFrameTime();
 
-			// process one or more tics
-			if (singletics)
-			{
-				I_StartTic ();
-				D_ProcessEvents ();
-				G_BuildTiccmd (&netcmds[consoleplayer][maketic%BACKUPTICS]);
-				if (advancedemo)
-					D_DoAdvanceDemo ();
-				C_Ticker ();
-				M_Ticker ();
-				G_Ticker ();
-				// [RH] Use the consoleplayer's camera to update sounds
-				S_UpdateSounds (players[consoleplayer].camera);	// move positional sounds
-				gametic++;
-				maketic++;
-				GC::CheckGC ();
-				Net_NewMakeTic ();
-			}
-			else
-			{
-				TryRunTics (); // will run at least one tic
-			}
-			// Update display, next frame, with current state.
-			I_StartTic ();
-			D_Display ();
-			S_UpdateMusic();
-			if (wantToRestart)
-			{
-				wantToRestart = false;
-				return;
-			}
-		}
-		catch (CRecoverableError &error)
-		{
-			if (error.GetMessage ())
-			{
-				Printf (PRINT_BOLD, "\n%s\n", error.GetMessage());
-			}
-			D_ErrorCleanup ();
-		}
-		catch (CVMAbortException &error)
-		{
-			error.MaybePrintMessage();
-			Printf("%s", error.stacktrace.GetChars());
-			D_ErrorCleanup();
-		}
+                // process one or more tics
+                if (singletics)
+                {
+                    I_StartTic ();
+                    D_ProcessEvents ();
+                    G_BuildTiccmd (&netcmds[consoleplayer][maketic%BACKUPTICS]);
+                    if (advancedemo)
+                        D_DoAdvanceDemo ();
+                    C_Ticker ();
+                    M_Ticker ();
+                    G_Ticker ();
+                    // [RH] Use the consoleplayer's camera to update sounds
+                    S_UpdateSounds (players[consoleplayer].camera);	// move positional sounds
+                    gametic++;
+                    maketic++;
+                    GC::CheckGC ();
+                    Net_NewMakeTic ();
+                }
+                else
+                {
+                    TryRunTics (); // will run at least one tic
+                }
+                // Update display, next frame, with current state.
+                I_StartTic ();
+                D_Display ();
+                S_UpdateMusic();
+                if (wantToRestart)
+                {
+                    wantToRestart = false;
+                    return;
+                }
+            }
+            catch (CRecoverableError &error)
+            {
+                if (error.GetMessage ())
+                {
+                    Printf (PRINT_BOLD, "\n%s\n", error.GetMessage());
+                }
+                D_ErrorCleanup ();
+            }
+            catch (CVMAbortException &error)
+            {
+                error.MaybePrintMessage();
+                Printf("%s", error.stacktrace.GetChars());
+                D_ErrorCleanup();
+            }
+        }
 	}
 }
 
