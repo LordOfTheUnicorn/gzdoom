@@ -455,27 +455,11 @@ void MTLRenderer::RenderScreenQuad()
     vertexDesc.layouts[1].stepFunction = MTLVertexStepFunctionPerVertex;
     //##############################################################
     NSError* error = nil;
-    OBJC_ID(MTLLibrary) _defaultLibrary;
-    {
-        int shaderLump = fileSystem.CheckNumForFullName("shaders/metal/mainVP.metal",0);
-        if (shaderLump == -1)
-        {
-            I_FatalError("shaders/metal/mainVP.metal not found!");
-        }
-        FileData shaderLumpMem = fileSystem.ReadFile(shaderLump);
-        NSString* shaderString = [[NSString alloc] initWithUTF8String:shaderLumpMem.GetString().GetChars()];
-        MTLCompileOptions* compileOptions = [[MTLCompileOptions alloc] init];
-        compileOptions.fastMathEnabled = false;
-        compileOptions.languageVersion = MTLLanguageVersion2_2;
 
-        _defaultLibrary = [device newLibraryWithSource: shaderString
-                                               options: compileOptions
-                          error:&error];
-    }
-    if (error && _defaultLibrary == nil)
+    if (error && MLRenderer->ml_RenderState->defaultLibrary == nil)
         assert(true);
-    OBJC_ID(MTLFunction) vs = [_defaultLibrary newFunctionWithName:@"vertexSecondRT"];
-    OBJC_ID(MTLFunction) fs = [_defaultLibrary newFunctionWithName:@"fragmentSecondRT"];
+    OBJC_ID(MTLFunction) vs = [MLRenderer->ml_RenderState->defaultLibrary newFunctionWithName:@"vertexSecondRT"];
+    OBJC_ID(MTLFunction) fs = [MLRenderer->ml_RenderState->defaultLibrary newFunctionWithName:@"fragmentSecondRT"];
     
     pipelineDesc.label = @"Second RT";
     pipelineDesc.vertexFunction = vs;
@@ -485,7 +469,7 @@ void MTLRenderer::RenderScreenQuad()
     
     if (MLRenderer->ml_RenderState->pipelineState[PIPELINE_STATE] == nil)
         MLRenderer->ml_RenderState->pipelineState[PIPELINE_STATE] = [device newRenderPipelineStateWithDescriptor:pipelineDesc  error:&error];
-    if(error && _defaultLibrary == nil)
+    if(error)
     {
         NSLog(@"Failed to created pipeline state, error %@", error);
     }

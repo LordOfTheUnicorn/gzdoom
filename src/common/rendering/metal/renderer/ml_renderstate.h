@@ -145,7 +145,7 @@ class MTLRenderState : public FRenderState
 
 
 public:
-    OBJC_ID(MTLRenderPipelineState) pipelineState[PIPELINE_STATE];
+    OBJC_ID(MTLRenderPipelineState) pipelineState[PIPELINE_STATE + 1];
     OBJC_ID(MTLLibrary) defaultLibrary;
     MTLShader *activeShader;
     int val = 0;
